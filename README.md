@@ -1,5 +1,5 @@
 # iosocket-game-of-life
-A "multiplayer" game of life (with chat)
+A "multiplayer" Conway's game of life (with chat)
 
 ## Demo
 The master branch is directly deployed to heroku: https://iosocket-game-of-life.herokuapp.com/
@@ -30,8 +30,10 @@ The master branch is directly deployed to heroku: https://iosocket-game-of-life.
 
 - Angular
 - Angular's Boostrap UI
-- HTML 5 (canvas)
 - socket.io
 - toaster (notifications)
 - scrollglue (scroll to bottom of divs)
 
+## Screenshot
+
+![Game of Life](https://raw.githubusercontent.com/germanger/iosocket-game-of-life/screenshot.png)
