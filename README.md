@@ -36,4 +36,4 @@ The master branch is directly deployed to heroku: https://iosocket-game-of-life.
 
 ## Screenshot
 
-![Game of Life](https://raw.githubusercontent.com/germanger/iosocket-game-of-life/screenshot.png)
+![Game of Life](https://raw.githubusercontent.com/germanger/iosocket-game-of-life/master/screenshot.png)
