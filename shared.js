@@ -1,6 +1,7 @@
 module.exports = {
     io: {},
     users: {},
+    simulationId: undefined,
     grid: {
         rows: 20,
         cols: 20,

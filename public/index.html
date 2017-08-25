@@ -52,6 +52,7 @@
             $scope.newMessageBody = "";
             $scope.users = [];
             $scope.messages = [];
+            $scope.running = false;
             $scope.grid = {
                 rows: 1,
                 cols: 1,
@@ -207,19 +208,21 @@
                     });
                     
                     $scope.socket.on("gridUpdate", function(data) {                   
-                        $scope.fetchGrid();
+                        $scope.grid = data.grid;
 
                         $scope.$apply()
                     });
                     
                     $scope.socket.on("userStartedSimulation", function(data) {                   
                         $scope.messages.push(data.message);
+                        $scope.running = true;
 
                         $scope.$apply()
                     });
                     
                     $scope.socket.on("userPausedSimulation", function(data) {                   
                         $scope.messages.push(data.message);
+                        $scope.running = false;
 
                         $scope.$apply()
                     });
@@ -343,6 +346,7 @@
                     }
                     
                     $scope.grid = response.grid;
+                    $scope.running = response.running;
                 });
                 
                 httpRequest['finally'](function() {
@@ -556,6 +560,8 @@
                         <button class="btn btn-default" ng-click="clearMessages()" ng-disabled="clearingMessages">Clear messages</button>
                     </div>
                 </form>
+                
+                <p>Simulation: {{ running ? "Running..." : "Stopped" }}</p>
 			</div>
         </div>
         

@@ -9,7 +9,8 @@ router.get('/current', function(req, res, next) {
 
     res.json({
         error: false,
-        grid: shared.grid
+        grid: shared.grid,
+        running: (shared.simulationId != undefined)
     });
 });
 
@@ -19,9 +20,9 @@ router.get('/start', function(req, res, next) {
         return next(new Error('socketId not found in list of users'));
     }
     
-    if (shared.intervalId) {
+    if (shared.simulationId) {
         res.json({
-            error: false
+            error: false,
         });
         
         return;
@@ -39,31 +40,25 @@ router.get('/start', function(req, res, next) {
     var _countLiveNeighbors = function(row, col, grid) {
     	var count = 0;
 
-        for (var i = -1; i <= 1; i++)
-        {
-            for (var j = -1; j <= 1; j++)
-            {
+        for (var i = -1; i <= 1; i++) {
+            for (var j = -1; j <= 1; j++) {
                 var neighborRow = row + i;
                 var neighborColumn = col + j;
 
                 // The cell itself is not a neighbor
-                if (i == 0 && j == 0) 
-                {
+                if (i == 0 && j == 0) {
                     continue;
                 }
 
                 // Border cases
-                if ((neighborRow == -1) || (neighborRow == shared.grid.rows) || (neighborColumn == -1) || (neighborColumn == shared.grid.cols))
-                {
+                if ((neighborRow == -1) || (neighborRow == shared.grid.rows) || (neighborColumn == -1) || (neighborColumn == shared.grid.cols)) {
                     continue;
                 }
 
                 // We've found a live neighbor
-                if (grid[neighborRow][neighborColumn])
-                {
+                if (grid[neighborRow][neighborColumn]) {
                 	count++;
                 }
-
             }
         }
 
@@ -71,49 +66,34 @@ router.get('/start', function(req, res, next) {
     }
 
     // Start simulation
-    shared.intervalId = setInterval(function() {
-        
-        //shared.grid.cells[0][0] = !shared.grid.cells[0][0];
-        
+    shared.simulationId = setInterval(function() {
+
         // Backup current grid
         var backup = shared.grid.cells.map(function(arr) {
                 return arr.slice();
         });
 
         // Review rules for each cell
-        for (var i = 0; i < shared.grid.rows; i++)
-        {
-            for (var j = 0; j < shared.grid.cols; j++)
-            {
+        for (var i = 0; i < shared.grid.rows; i++) {
+            for (var j = 0; j < shared.grid.cols; j++) {
                 var liveNeighborsCount = _countLiveNeighbors(i, j, backup);
 
-                if (shared.grid.cells[i][j] == true)
-                {
-                    if (liveNeighborsCount == 2 || liveNeighborsCount == 3)
-                    {
-                        // Continue living
-                    }
-                    else
-                    {
+                if (shared.grid.cells[i][j] == true) {
+                    if (liveNeighborsCount < 2 || liveNeighborsCount > 3) {
                         shared.grid.cells[i][j] = false;
                     }
                 }
-                else
-                {
-                    if (liveNeighborsCount == 3)
-                    {
+                else {
+                    if (liveNeighborsCount == 3) {
                         shared.grid.cells[i][j] = true;
                     }
-
                 }
             }
         }
         
-        
-        
-        
         // Broadcast message
         shared.io.sockets.emit('gridUpdate', {
+            grid: shared.grid
         });
         
     }, 1000);
@@ -137,7 +117,7 @@ router.get('/pause', function(req, res, next) {
         return next(new Error('socketId not found in list of users'));
     }
     
-    if (!shared.intervalId) {
+    if (!shared.simulationId) {
         res.json({
             error: false
         });
@@ -155,8 +135,8 @@ router.get('/pause', function(req, res, next) {
     };
 
     // Pause simulation
-    clearInterval(shared.intervalId);
-    shared.intervalId = undefined;
+    clearInterval(shared.simulationId);
+    shared.simulationId = undefined;
     
     // Save message
     shared.messages.push(message);
